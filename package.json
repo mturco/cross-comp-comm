@@ -1,0 +1,14 @@
+{
+  "name": "cross-comp-comm",
+  "version": "1.0.0",
+  "main": "index.mdx",
+  "repository": "git@github.com:mturco/cross-comp-comm.git",
+  "author": "Matt Turco <matt.turco@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "mdx-deck index.mdx"
+  },
+  "dependencies": {
+    "mdx-deck": "^3.0.13"
+  }
+}
