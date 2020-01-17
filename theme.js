@@ -7,13 +7,7 @@ export const custom = {
   },
   colors: {
     text: '#000',
-    // background: '#fd0',
     primary: '#333'
-  },
-  text: {
-    heading: {
-      // textTransform: 'uppercase'
-    }
   },
   styles: {
     pre: {
@@ -23,7 +17,8 @@ export const custom = {
     },
     code: {
       color: 'background',
-      bg: 'text'
+      bg: 'text',
+      fontSize: '0.75em'
     }
   }
 };

@@ -6,5 +6,8 @@
   },
   "[markdown]": {
     "editor.fontSize": 18
+  },
+  "[javascript]": {
+    "editor.formatOnSave": true
   }
 }

@@ -2,17 +2,35 @@ import { Notes } from 'mdx-deck';
 import { aspect, prism } from 'mdx-deck/themes';
 import { custom } from './theme';
 
-export const themes = [prism, custom];
+export const themes = [aspect, prism, custom];
 
 # Cross Component Communication
 
 ---
 
-## Common Problems
+## About Me
+
+Matt Turco
+
+Senior Frontend Engineer at Namely
+
+<!-- TODO: improve -->
+<!-- TODO: agenda slide? -->
 
 ---
 
-### Using Props
+## Communication Options
+
+We have many options, but they're each flawed
+
+<!-- TODO: explain going to go over a few solutions
+to common problems and then combine them to solve larger problem -->
+
+<!-- TODO: after each solution, describe scenario that necessitates it -->
+
+---
+
+### Option 1: Props
 
 ```jsx
 <Greeting subject="World" />
@@ -20,9 +38,15 @@ export const themes = [prism, custom];
 <p>Hello, {subject}!</p>
 ```
 
+<Notes>
+  Props are the simplest way to pass data between components
+  <hr />
+  They should be the first option we reach for
+</Notes>
+
 ---
 
-### Problem: Prop Drilling
+### Problem: Prop drilling is tedious and redundant
 
 ```jsx
 <App userName="Michael Scott" />
@@ -36,9 +60,27 @@ export const themes = [prism, custom];
 <p>Welcome back, {userName}!</p>
 ```
 
+<Notes>
+  Sometimes we need to pass data down through several layers of
+  components in our application
+  <hr />
+  If we did this using props, we'd need to add a prop to every
+  component in the tree all the way down to the actual consumer
+  <hr />
+  This is often referred to as "prop drilling" and, while it
+  works, it has some downsides
+  <hr />
+  Redundant code
+  <hr />
+  API changes are noisy
+  <hr />
+  Separation of concerns (prop-drilled components take props they
+  themselves may not care about)
+</Notes>
+
 ---
 
-### Solution: Use Context
+### Solution: Use context
 
 ```jsx
 const UserContext = React.createContext(null);
@@ -53,7 +95,17 @@ const UserContext = React.createContext(null);
         ...
 ```
 
+<Notes>
+  One way to solve this is by using React Context
+  <hr />
+  By passing the data to a context provider, we allow any
+  component that needs access to it to optionally consume the
+  data
+</Notes>
+
 ---
+
+### Solution: Use context (cont)
 
 ```jsx
 const UserGreeting = () => {
@@ -62,12 +114,39 @@ const UserGreeting = () => {
 };
 ```
 
+<Notes>
+  Since UserGreeting needs access to the user's name, it
+  internally uses the useContext hook to get access to the user
+  data we passed to the provider
+</Notes>
+
 ---
 
-### Using Render Props
+### Option 2: Render props
+
+<!-- TODO: briefly explain render props -->
+<!-- maybe need more relatable example -->
+<!-- better transition to introduce second pattern -->
 
 ```jsx
-<Counter initialValue={0}>
+// React Router
+<Route path="/home" render={() => <h1>Welcome home</h1>} />
+```
+
+<Notes>
+  Another option we have for passing data between components is
+  render props
+  <hr />
+  Render props are simply function props that return JSX for the
+  component to render
+</Notes>
+
+---
+
+### Option 2: Render props (cont)
+
+```jsx
+<Counter>
   {({ count, increment, decrement }) => (
     <>
       <p>Count: {count}</p>
@@ -78,11 +157,27 @@ const UserGreeting = () => {
 </Counter>
 ```
 
+<Notes>
+  Render props don't need to be called render either
+  <hr />
+  The children prop is often used because of its special syntax
+  in React
+  <hr />
+  Here we have a Counter component whose children prop is a
+  render prop
+  <hr />
+  It gets passed an object with 3 properties: count (the current
+  value of the counter), increment (a function that increases the
+  counter) and decrement (a function that decreases the counter)
+</Notes>
+
 ---
 
+### Option 2: Render props (cont)
+
 ```jsx
-const Counter = ({ children, initialValue }) => {
-  const [count, setCount] = useState(initialValue);
+const Counter = ({ children }) => {
+  const [count, setCount] = useState(0);
   const props = useMemo(
     () => ({
       count,
@@ -97,7 +192,7 @@ const Counter = ({ children, initialValue }) => {
 
 ---
 
-### Problem: Hierarchy dictates access to props
+### Problem: Data is not accessible outside the function
 
 ```jsx
 const CloudCounter = ({ save }) => {
@@ -114,9 +209,93 @@ const CloudCounter = ({ save }) => {
 };
 ```
 
+<Notes>TODO</Notes>
+
+<!-- TODO: add realistic example from Namely -->
+
 ---
 
-## Useful Patterns
+### Solution: Use a ref
+
+```jsx
+// TODO: add example
+```
+
+---
+
+## Other Useful Patterns
+
+TODO: rethink
+
+---
+
+### Using context to communicate between compound components
+
+```jsx
+// redundant
+<RadioButton name="color" value="red" checked={color === 'red'} />
+<RadioButton name="color" value="green" checked={color === 'green'} />
+<RadioButton name="color" value="blue" checked={color === 'blue'} />
+```
+
+---
+
+```jsx
+// concise
+<RadioGroup name="color" value={color}>
+  <RadioButton value="red" />
+  <RadioButton value="green" />
+  <RadioButton value="blue" />
+</RadioGroup>
+```
+
+---
+
+```jsx
+const RadioGroup = ({ children, name, value, onChange }) => {
+  const context = useMemo(() => ({ name, value, onChange }), [
+    name,
+    value,
+    onChange
+  ]);
+
+  return (
+    <RadioGroupContext.Provider value={context}>
+      {children}
+    </RadioGroupContext>
+  );
+};
+```
+
+---
+
+```jsx
+const RadioButton = ({ value }) => {
+  const { name, selectedValue } = useContext(RadioGroupContext);
+
+  return (
+    <input
+      type="radio"
+      name={name}
+      value={value}
+      checked={value === selectedValue}
+    />
+  );
+};
+```
+
+<!-- second more complicated example? -->
+
+---
+
+```jsx
+// with a more generic name, can be re-used
+<SelectionGroup name="sizes" value={sizes}>
+  <Checkbox value="small" />
+  <Checkbox value="medium" />
+  <Checkbox value="large" />
+</SelectionGroup>
+```
 
 ---
 
