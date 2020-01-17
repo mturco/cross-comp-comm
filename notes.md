@@ -29,9 +29,9 @@
    TODO: example
 
    ```jsx
-useImperativeHandle(ref.current, () => ({
-  
-}))
+   useImperativeHandle(ref.current, () => ({
+     foo: () => null,
+   }));
    ```
 
 1. Using context to communicate between compound components
