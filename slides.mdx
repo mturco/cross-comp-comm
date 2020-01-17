@@ -1,107 +1,125 @@
+import { Notes } from 'mdx-deck';
 import { aspect, prism } from 'mdx-deck/themes';
 import { custom } from './theme';
 
-export const themes = [aspect, prism, custom];
+export const themes = [prism, custom];
 
 # Cross Component Communication
 
 ---
 
-# Common Problems
+## Common Problems
 
 ---
 
-## Props
+### Using Props
 
 ```jsx
 <Greeting subject="World" />
+// ↓
+<p>Hello, {subject}!</p>
 ```
 
 ---
 
-## Prop Drilling
+### Problem: Prop Drilling
 
 ```jsx
-<Grandparent foo="World" />
-
-// which renders
-<Parent foo={foo} />
-
-// which renders
-<Child foo={foo} />
-
-// which renders
-<p>Hello, {foo}</p>
+<App userName="Michael Scott" />
+// ↓
+<Dashboard userName={userName} />
+// ↓
+<DashboardHeader userName={userName} />
+// ↓
+<UserGreeting userName={userName} />
+// ↓
+<p>Welcome back, {userName}!</p>
 ```
 
 ---
 
-## Render Props
+### Solution: Use Context
 
 ```jsx
-// TODO
-const Parent = ({ children }) => {
-  const handle = useCallback(foo => foo, []);
-  return children(handle);
-};
+const UserContext = React.createContext(null);
+```
 
-const Child = ({ prop }) => <p>{prop}</p>;
-
-<Parent>
-  {({ prop, handle }) => <Child prop={prop} on={handle} />}
-</Parent>;
+```jsx
+<UserContext.Provider value={user}>
+  <App>
+    <Dashboard>
+      <DashboardHeader>
+        <UserGreeting />
+        ...
 ```
 
 ---
 
-## Render Props (cont)
-
 ```jsx
-// Can't access prop from Grandparent
-<Grandparent>
-  <Parent>
-    {({ prop, handle }) => <Child prop={prop} on={handle} />}
-  </Parent>;
-</Grandparent>
-```
-
----
-
-# Solutions
-
-(TODO: reword?)
-
----
-
-## Context
-
-```jsx
-const FooContext = React.createContext();
-
-const Grandparent = () => (
-  <FooContext.Provider value="Hello world">
-    <Parent />
-  </FooContext.Provider>
-);
-```
-
----
-
-## Context (cont)
-
-```jsx
-const Child = () => {
-  const foo = useContext(FooContext);
-  return <p>{foo}</p>;
+const UserGreeting = () => {
+  const user = useContext(UserContext);
+  return <p>Welcome back, {user.name}!</p>;
 };
 ```
 
 ---
 
-# Useful Patterns
+### Using Render Props
+
+```jsx
+<Counter initialValue={0}>
+  {({ count, increment, decrement }) => (
+    <>
+      <p>Count: {count}</p>
+      <button onClick={increment}>++</button>
+      <button onClick={decrement}>--</button>
+    </>
+  )}
+</Counter>
+```
 
 ---
 
-# Namely is Hiring
+```jsx
+const Counter = ({ children, initialValue }) => {
+  const [count, setCount] = useState(initialValue);
+  const props = useMemo(
+    () => ({
+      count,
+      increment: () => setCount(c => c + 1),
+      decrement: () => setCount(c => c - 1)
+    }),
+    [count, setCount]
+  );
+  return children(props);
+};
+```
+
+---
+
+### Problem: Hierarchy dictates access to props
+
+```jsx
+const CloudCounter = ({ save }) => {
+  // Oops! We don't have access to `count` from here
+  useEffect(() => save(count), [count]);
+
+  return (
+    <Counter>
+      {({ count, increment, decrement }) => {
+        // ...
+      }}
+    </Counter>
+  );
+};
+```
+
+---
+
+## Useful Patterns
+
+---
+
+## Namely is Hiring
 
 (placeholder)
