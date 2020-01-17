@@ -1,0 +1,86 @@
+import { aspect, prism } from 'mdx-deck/themes';
+import { custom } from './theme';
+
+export const themes = [aspect, prism, custom];
+
+# Cross Component Communication
+
+---
+
+# Common Problems
+
+---
+
+## Prop Drilling
+
+```jsx
+<Grandparent foo="World" />
+
+// which renders
+<Parent foo={foo} />
+
+// which renders
+<Child foo={foo} />
+
+// which renders
+<p>Hello, {foo}</p>
+```
+
+---
+
+## Render Props
+
+```jsx
+// TODO
+const Parent = ({ children }) => {
+  const handle = useCallback(foo => foo, []);
+  return children(handle);
+};
+
+const Child = ({ prop }) => <p>{prop}</p>;
+
+<Parent>
+  {({ prop, handle }) => <Child prop={prop} on={handle} />}
+</Parent>;
+```
+
+---
+
+# Solutions
+
+(TODO: reword?)
+
+---
+
+## Context
+
+```jsx
+const FooContext = React.createContext();
+
+const Grandparent = () => (
+  <FooContext.Provider value="Hello world">
+    <Parent />
+  </FooContext.Provider>
+);
+```
+
+---
+
+## Context (cont)
+
+```jsx
+const Child = () => {
+  const foo = useContext(FooContext);
+  return <p>{foo}</p>;
+};
+```
+
+---
+
+# Useful Patterns
+
+---
+
+# Namely is Hiring
+
+(placeholder)

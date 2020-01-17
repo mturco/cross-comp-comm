@@ -1,14 +1,22 @@
 {
   "name": "cross-comp-comm",
   "version": "1.0.0",
-  "main": "index.mdx",
+  "main": "slides.mdx",
   "repository": "git@github.com:mturco/cross-comp-comm.git",
   "author": "Matt Turco <matt.turco@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "mdx-deck index.mdx"
+    "build": "mdx-deck build slides.mdx",
+    "start": "mdx-deck slides.mdx"
   },
   "dependencies": {
     "mdx-deck": "^3.0.13"
+  },
+  "resolutions": {
+    "mdx-deck/**/gatsby": "2.18.4"
+  },
+  "prettier": {
+    "printWidth": 60,
+    "singleQuote": true
   }
 }
