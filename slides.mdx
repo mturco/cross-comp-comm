@@ -11,6 +11,14 @@ export const themes = [aspect, prism, custom];
 
 ---
 
+## Props
+
+```jsx
+<Greeting subject="World" />
+```
+
+---
+
 ## Prop Drilling
 
 ```jsx
@@ -42,6 +50,19 @@ const Child = ({ prop }) => <p>{prop}</p>;
 <Parent>
   {({ prop, handle }) => <Child prop={prop} on={handle} />}
 </Parent>;
+```
+
+---
+
+## Render Props (cont)
+
+```jsx
+// Can't access prop from Grandparent
+<Grandparent>
+  <Parent>
+    {({ prop, handle }) => <Child prop={prop} on={handle} />}
+  </Parent>;
+</Grandparent>
 ```
 
 ---
