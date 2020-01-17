@@ -9,7 +9,7 @@
 1. Render props
 
    - can't access props from above in the component tree
-   - prevents memoization (https://reactjs.org/docs/render-props.html#be-careful-when-using-render-props-with-reactpurecomponent)
+   - prevents optimization (https://reactjs.org/docs/render-props.html#be-careful-when-using-render-props-with-reactpurecomponent)
 
 1. Redux (and other flux libraries)
 
@@ -29,6 +29,9 @@
    TODO: example
 
    ```jsx
+useImperativeHandle(ref.current, () => ({
+  
+}))
    ```
 
 1. Using context to communicate between compound components
@@ -62,5 +65,15 @@
 
    TODO: example
 
-   ```jsx
+   ```tsx
+   type ActionType = 'foo' | 'bar';
+
+   interface Action {
+     type: ActionType;
+     payload?: unknown;
+   }
+
+   type Dispatch = (action: Action) => void;
+
+   const FluxContext = React.createContext<Dispatch>();
    ```
