@@ -1,36 +1,66 @@
 import { Notes } from 'mdx-deck';
 import { aspect, prism } from 'mdx-deck/themes';
 import { custom } from './theme';
+import { Name, Pattern } from './components';
 
 export const themes = [aspect, prism, custom];
 
+# About Me
+
+<Name>Matt Turco</Name>
+<div>Frontend Engineer at Namely</div>
+<Notes>
+  Hi, my name is Matt Turco and I'm a frontend engineer here at
+  Namely
+  <hr />
+  I work on our frontend core team with 5 other engineers
+  <hr />
+  Our job is to establish the platform on which Namely builds
+  applications and features
+  <hr />
+  1. Setting opinionated best practices
+  <hr />
+  2. Building design system components
+  <hr />
+  3. Developing the most important or complicated areas of the
+  product
+  <hr />
+  4. Acting as consultants for any other frontend work going on
+</Notes>
+
+---
+
 # Cross Component Communication
 
----
-
-## About Me
-
-Matt Turco
-
-Senior Frontend Engineer at Namely
-
-<!-- TODO: improve -->
-<!-- TODO: agenda slide? -->
-
----
-
-## Communication Options
-
-We have many options, but they're each flawed
-
-<!-- TODO: explain going to go over a few solutions
-to common problems and then combine them to solve larger problem -->
-
-<!-- TODO: after each solution, describe scenario that necessitates it -->
+<Notes>
+  React provides with a number of APIs for communicating between
+  components
+  <hr />
+  Each of those APIs have their own use cases but also their own
+  shortcomings
+  <hr />
+  Here at Namely, we've encountered some of these shortcomings
+  while developings of some of our more complicated design system
+  components
+  <hr />
+  So today I'm going to share some of the issues we encountered
+  and some useful patterns we've created to tackle them
+</Notes>
 
 ---
 
-### Option 1: Props
+# Let's review our options
+
+<Notes>
+  But first, let's quickly review the options React has given us
+  for passing data between components
+  <hr />
+  Just so we're all on the same page
+</Notes>
+
+---
+
+## 1. Props
 
 ```jsx
 <Greeting subject="World" />
@@ -39,14 +69,156 @@ to common problems and then combine them to solve larger problem -->
 ```
 
 <Notes>
-  Props are the simplest way to pass data between components
+  Props are the simplest way to pass data between components in
+  React and really most frontend frameworks
   <hr />
-  They should be the first option we reach for
+  They should be the first option we reach for because they
+  introduce the least complexity
+  <hr />
+  Keeping complexity low is important because it keeps code
+  understandable, debuggable, and testable
 </Notes>
 
 ---
 
-### Problem: Prop drilling is tedious and redundant
+## 2. Render Props
+
+```jsx
+// React Router
+<Route path="/home" render={() => <h1>Home</h1>} />
+
+// React PowerPlug
+<Toggle initial={false}>
+  {({ on, toggle }) => (
+    <Checkbox onClick={toggle} checked={on} />
+  )}
+</Toggle>
+```
+
+<Notes>
+  Another option we have for passing data between components is
+  render props
+  <hr />
+  Render props are simply function props that return JSX for the
+  component to render
+  <hr />
+  2 examples here from popular React libraries
+  <hr />
+  React Router uses a prop actually called render
+  <hr />
+  React PowerPlug is taking advantage of the children prop's
+  special syntax in React (very common)
+</Notes>
+
+---
+
+## 3. Refs
+
+```jsx
+const ref = useRef();
+
+useEffect(() => {
+  ref.current.focus();
+}, []);
+
+return <Input ref={ref} />;
+```
+
+<Notes>
+  Refs allow us to the access DOM nodes that React renders to the
+  browser
+  <hr />
+  This can be useful to do things like focus management, getting
+  an element's dimesions, or directly manipulating the DOM
+  <hr />
+  Refs can also be used for many other things though
+  <hr />
+  In functional components they can be used as essentially
+  instance variables
+  <hr />
+  But they can also be used to pass data between components which
+  we'll revisit later
+</Notes>
+
+---
+
+## 4. Context
+
+```jsx
+<ThemeContext.Provider value={theme}>
+  ...
+    <Button />
+```
+
+```jsx
+const Button = props => {
+  const theme = useContext(ThemeContext);
+  return <button {...props} className={theme} />;
+};
+```
+
+<Notes>
+  Lastly, we have context
+  <hr />
+  Context works by passing a value to a provider component
+  <hr />
+  Any component rendered under this provider in the component
+  tree can then subscribe to this value using the useContext hook
+  <hr />
+  One of the most common use case examples given is for passing
+  theming data to components that then customize their appearance
+  <hr />
+  As we'll see in the next few minutes, context is extremely
+  powerful and can simplify component communication in a lot of
+  scenarios
+</Notes>
+
+---
+
+# We have some good options
+
+1. Props
+2. Render Props
+3. Refs
+4. Context
+
+...but sometimes things get messy
+
+<Notes>
+  So we have some good options for passing data around in our
+  applications
+  <hr />
+  But things can still sometimes get messy
+  <hr />
+  We can find ourselves prop drilling or ending up writing
+  abstractions that are hard to test
+  <hr />
+  So let's look at some patterns to help avoid these issues
+</Notes>
+
+---
+
+# Useful Patterns
+
+<div>
+  <Pattern active>
+    1. Using context to provide common data at the application
+    level
+  </Pattern>
+  <Pattern>
+    2. Using context to communicate between compound components
+  </Pattern>
+  <Pattern>
+    3. Using refs to avoid scope issues with render props
+  </Pattern>
+  <Pattern>
+    4. Using context and useReducer for dependency-agnostic flux
+  </Pattern>
+</div>
+
+---
+
+### Problem: Prop drilling
 
 ```jsx
 <App userName="Michael Scott" />
@@ -96,11 +268,13 @@ const UserContext = React.createContext(null);
 ```
 
 <Notes>
-  One way to solve this is by using React Context
+  One way to solve this is by using context
   <hr />
-  By passing the data to a context provider, we allow any
-  component that needs access to it to optionally consume the
-  data
+  If many parts of our application need to access data about the
+  user, it might make sense to pass the user data to a context
+  provider at the root app level
+  <hr />
+  TODO: reiterate how problems are now solved
 </Notes>
 
 ---
@@ -115,148 +289,97 @@ const UserGreeting = () => {
 ```
 
 <Notes>
-  Since UserGreeting needs access to the user's name, it
-  internally uses the useContext hook to get access to the user
-  data we passed to the provider
+  Now any component that needs access to the user's name, for
+  example, can choose to consume that information
+  <hr />
+  So we can update our UserGreeting component to internally use
+  the useContext hook to get access to the user data we passed to
+  the provider
 </Notes>
 
 ---
 
-### Option 2: Render props
+# Useful Patterns
 
-<!-- TODO: briefly explain render props -->
-<!-- maybe need more relatable example -->
-<!-- better transition to introduce second pattern -->
-
-```jsx
-// React Router
-<Route path="/home" render={() => <h1>Welcome home</h1>} />
-```
-
-<Notes>
-  Another option we have for passing data between components is
-  render props
-  <hr />
-  Render props are simply function props that return JSX for the
-  component to render
-</Notes>
-
----
-
-### Option 2: Render props (cont)
-
-```jsx
-<Counter>
-  {({ count, increment, decrement }) => (
-    <>
-      <p>Count: {count}</p>
-      <button onClick={increment}>++</button>
-      <button onClick={decrement}>--</button>
-    </>
-  )}
-</Counter>
-```
-
-<Notes>
-  Render props don't need to be called render either
-  <hr />
-  The children prop is often used because of its special syntax
-  in React
-  <hr />
-  Here we have a Counter component whose children prop is a
-  render prop
-  <hr />
-  It gets passed an object with 3 properties: count (the current
-  value of the counter), increment (a function that increases the
-  counter) and decrement (a function that decreases the counter)
-</Notes>
+<div>
+  <Pattern>
+    1. Using context to provide common data at the application
+    level
+  </Pattern>
+  <Pattern active>
+    2. Using context to communicate between compound components
+  </Pattern>
+  <Pattern>
+    3. Using refs to avoid scope issues with render props
+  </Pattern>
+  <Pattern>
+    4. Using context and useReducer for dependency-agnostic flux
+  </Pattern>
+</div>
 
 ---
 
-### Option 2: Render props (cont)
+### Problem: Repeated props
 
 ```jsx
-const Counter = ({ children }) => {
-  const [count, setCount] = useState(0);
-  const props = useMemo(
-    () => ({
-      count,
-      increment: () => setCount(c => c + 1),
-      decrement: () => setCount(c => c - 1)
-    }),
-    [count, setCount]
-  );
-  return children(props);
-};
-```
-
----
-
-### Problem: Data is not accessible outside the function
-
-```jsx
-const CloudCounter = ({ save }) => {
-  // Oops! We don't have access to `count` from here
-  useEffect(() => save(count), [count]);
-
-  return (
-    <Counter>
-      {({ count, increment, decrement }) => {
-        // ...
-      }}
-    </Counter>
-  );
-};
-```
-
-<Notes>TODO</Notes>
-
-<!-- TODO: add realistic example from Namely -->
-
----
-
-### Solution: Use a ref
-
-```jsx
-// TODO: add example
-```
-
----
-
-## Other Useful Patterns
-
-TODO: rethink
-
----
-
-### Using context to communicate between compound components
-
-```jsx
-// redundant
 <RadioButton name="color" value="red" checked={color === 'red'} />
 <RadioButton name="color" value="green" checked={color === 'green'} />
 <RadioButton name="color" value="blue" checked={color === 'blue'} />
+<RadioButton name="color" value="yellow" checked={color === 'yellow'} />
+<RadioButton name="color" value="purple" checked={color === 'purple'} />
 ```
+
+The only distinct data here is each radio's `value`
+
+<Notes>
+  I'd be willing to bet we've all seen code like this
+  <hr />
+  The way native radio buttons work requires that we repeat the
+  group name "color" for each radio button
+  <hr />
+  Worse than that is the fact that the logic for the checked prop
+  is being repeated for each radio button as well
+  <hr />
+  So what do we do about this?
+</Notes>
 
 ---
 
+### Solution: RadioGroup component that uses context
+
 ```jsx
-// concise
-<RadioGroup name="color" value={color}>
+<RadioGroup name="color" selectedValue={color}>
   <RadioButton value="red" />
   <RadioButton value="green" />
   <RadioButton value="blue" />
+  <RadioButton value="yellow" />
+  <RadioButton value="purple" />
 </RadioGroup>
 ```
 
+Now all common data is passed to `RadioGroup`
+
+<Notes>
+  One solution would be to introduce a RadioGroup component that
+  takes name and value props and passes them down to our
+  RadioButton components via context
+  <hr />
+  This abstracts the data and logic that the radio buttons had in
+  common in a single place
+  <hr />
+  The group name and the currently selected value are now passed
+  only once to RadioGroup
+</Notes>
+
 ---
 
+### Solution: RadioGroup component that uses context (cont)
+
 ```jsx
-const RadioGroup = ({ children, name, value, onChange }) => {
-  const context = useMemo(() => ({ name, value, onChange }), [
+const RadioGroup = ({ children, name, selectedValue }) => {
+  const context = useMemo(() => ({ name, selectedValue }), [
     name,
-    value,
-    onChange
+    selectedValue
   ]);
 
   return (
@@ -267,7 +390,20 @@ const RadioGroup = ({ children, name, value, onChange }) => {
 };
 ```
 
+<Notes>
+  If we take a look at the RadioGroup component, we see that it's
+  not doing much internally
+  <hr />
+  Essentially it's just forwardng the data along in a context
+  provider
+  <hr />
+  Note that we're using useMemo here to avoid creating a new
+  object instance on every render
+</Notes>
+
 ---
+
+### Solution: RadioGroup component that uses context (cont)
 
 ```jsx
 const RadioButton = ({ value }) => {
@@ -284,21 +420,256 @@ const RadioButton = ({ value }) => {
 };
 ```
 
-<!-- second more complicated example? -->
+<Notes>
+  Next let's take a look at the RadioButton component
+  <hr />
+  It's also very simple
+  <hr />
+  It's essentially just pulling out the name and selected value
+  from the radio group context and using them to render the radio
+  button
+  <hr />
+  Note that we're excluding the change event handler from the
+  code example to keep it short
+  <hr />
+  So here's an example of context cleaning up the API of a
+  compound component while keeping the implementation very simple
+  and easy to follow
+</Notes>
+
+<!-- TODO: second more complicated example? -->
 
 ---
 
+### Taking it a step further
+
 ```jsx
-// with a more generic name, can be re-used
-<SelectionGroup name="sizes" value={sizes}>
+<SelectionGroup name="sizes" selectedValue={sizes}>
   <Checkbox value="small" />
   <Checkbox value="medium" />
   <Checkbox value="large" />
 </SelectionGroup>
 ```
 
+<Notes>
+  The nice thing about this abstraction is that it is super
+  reusable
+  <hr />
+  In this example, we could rename RadioGroup to SelectionGroup
+  and allow it to be used with checkboxes as well
+  <hr />
+  With a slightly different change event handler, this would work
+  without any API changes
+</Notes>
+
+<!-- TODO: Add Vince's aria example -->
+
 ---
 
-## Namely is Hiring
+# Useful Patterns
 
-(placeholder)
+<div>
+  <Pattern>
+    1. Using context to provide common data at the application
+    level
+  </Pattern>
+  <Pattern>
+    2. Using context to communicate between compound components
+  </Pattern>
+  <Pattern active>
+    3. Using refs to avoid scope issues with render props
+  </Pattern>
+  <Pattern>
+    4. Using context and useReducer for dependency-agnostic flux
+  </Pattern>
+</div>
+
+---
+
+### Problem: Data provided by render props has a limited scope
+
+```jsx
+<Form>
+  {({ values, handleChange }) => (
+    <>
+      <input
+        name="name"
+        value={values.name}
+        onChange={handleChange}
+      />
+      <input
+        name="email"
+        value={values.email}
+        onChange={handleChange}
+      />
+      <button type="submit">Submit</button>
+    </>
+  )}
+</Form>
+```
+
+<Notes>
+  Imagine that we have a Form component that not only renders an
+  HTML form but also does some state management for us
+  <hr />
+  It's children prop is a render prop that passes us the form
+  state and a change event handler function
+</Notes>
+
+---
+
+### Problem: Data provided by render props has a limited scope (cont)
+
+```jsx
+const AutoSaveForm = ({ save }) => {
+  // Oops! We don't have access to `values` from here
+  useTimeInterval(15000, () => save(values));
+
+  return <Form>{({ values, handleChange }) => <>...</>}</Form>;
+};
+```
+
+<Notes>
+  Let's imagine we had an auto saving form that made an API call
+  every 15 seconds
+  <hr />
+  Unfortunately this wouldn't work because we don't have access
+  to the values variable outside of the render prop function
+</Notes>
+
+---
+
+### Solution: Provide instance methods or properties using a ref
+
+```jsx
+const Form = forwardRef(({ children }, forwardedRef) => {
+  const ref = useRef();
+  const [state, setState] = useState({});
+  const props = useMemo(
+    () => ({
+      values: state,
+      handleChange: evt =>
+        setState({ [evt.target.name]: evt.target.value })
+    }),
+    [state, setState]
+  );
+
+  useImperativeHandle(forwardedRef, () => ({
+    element: ref.current,
+    values: state
+  }));
+
+  return children(props);
+});
+```
+
+<Notes>
+  If we update the Form component to take a ref, we can attach an
+  instance property for values.
+</Notes>
+
+---
+
+### Solution: Provide instance methods or properties using a ref (cont)
+
+```jsx
+const AutoSaveForm = ({ save }) => {
+  const form = useRef();
+
+  useTimeInterval(15000, () => save(form.current.values));
+
+  return (
+    <Form ref={form}>
+      {({ values, handleChange }) => <>...</>}
+    </Form>
+  );
+};
+```
+
+<Notes>
+  Now we can use the instance property on the ref in our
+  useTimeInterval hook
+</Notes>
+
+---
+
+# Useful Patterns
+
+<div>
+  <Pattern>
+    1. Using context to provide common data at the application
+    level
+  </Pattern>
+  <Pattern>
+    2. Using context to communicate between compound components
+  </Pattern>
+  <Pattern>
+    3. Using refs to avoid scope issues with render props
+  </Pattern>
+  <Pattern active>
+    4. Using context and useReducer for dependency-agnostic flux
+  </Pattern>
+</div>
+
+---
+
+### Problem: Component's state management solution dictates app's
+
+---
+
+### Solution: Use context to pass a dispatch function
+
+```jsx
+// TODO
+
+const [state, dispatch] = useReducer(someReducer);
+
+return (
+  <SomeContext.Provider value={dispatch}>
+    ...
+  </SomeContext.Provider>
+);
+```
+
+```jsx
+// TODO
+
+const dispatch = useContext(SomeContext);
+const handleClick = useCallback(
+  () => dispatch({ type: 'SOME_ACTION' }),
+  [dispatch]
+);
+
+return (
+  // ...
+  <button onClick={handleClick}>Submit</button>
+  // ...
+);
+```
+
+---
+
+<svg
+  width="150"
+  height="150"
+  viewBox="0 0 167 155"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M90.169 41.094c-.743-.887-1.557-1.99-2.391-2.81-3.015-3.025-5.838-4.773-9.777-6.481-3.895-1.704-8.09-2.567-12.477-2.567-6.467 0-12.322 1.714-17.65 5.129-5.327 3.415-9.29 8.043-11.909 13.865L0 128.204 57.669 155l19.287-40.61c.75.941 1.586 2.175 2.463 3.035 3.015 3.025 5.685 4.561 9.684 6.255 4.034 1.728 8.242 2.575 12.669 2.575 6.423 0 12.208-1.748 17.334-5.278 5.143-3.509 9.085-8.181 11.909-14.002l35.895-79.927L109.483.356 90.169 41.094z"
+    fill="#006dd4"
+    fillRule="evenodd"
+  />
+</svg>
+
+# Namely is hiring frontend engineers!
+
+[namely.com/careers](https://www.namely.com/careers/)
+
+<Notes>
+  As a quick plug, we are currently looking for experienced
+  engineers to join our team
+  <hr />
+  So if any of what I said in this talk excites you, make sure to
+  find me later
+</Notes>

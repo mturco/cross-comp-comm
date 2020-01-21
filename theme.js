@@ -20,5 +20,6 @@ export const custom = {
       bg: 'text',
       fontSize: '0.75em'
     }
+    // inlineCode
   }
 };

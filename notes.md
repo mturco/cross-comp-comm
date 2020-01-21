@@ -1,3 +1,22 @@
+# Intro of comm options
+
+- brief explanation of each
+
+# Problems
+
+1. Prop drilling
+2. Render prop scopes
+3. Dictating state management solution
+4. Repeated hardcoded identifiers
+5. Difficult to test
+
+# Patterns
+
+- Providing common data via root level context (1)
+- Sharing dispatch via context (1, 3)
+- Adding instance props/methods to refs (2, 5)
+- Using context to communicate between compound components (4)
+
 # Common Problems
 
 1. Prop drilling
@@ -30,7 +49,7 @@
 
    ```jsx
    useImperativeHandle(ref.current, () => ({
-     foo: () => null,
+     foo: () => null
    }));
    ```
 
