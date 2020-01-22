@@ -139,8 +139,8 @@ export const patterns = [
   They should be the first option we reach for because they
   introduce the least complexity
   <hr />
-  Keeping complexity low is important because it keeps code
-  understandable, debuggable, and testable
+  Keeping complexity low is important because it keeps code easy
+  to read, test, and debug
 </Notes>
 
 ---
@@ -206,8 +206,8 @@ return <Input ref={ref} />;
   In functional components they can be used as essentially
   instance variables
   <hr />
-  But they can also be used to pass data between components which
-  we'll revisit later
+  And, as we'll see later, they can also be used to pass data
+  between components which we'll revisit later
 </Notes>
 
 ---
@@ -303,8 +303,8 @@ const Button = props => {
   <hr />
   API changes are noisy
   <hr />
-  Separation of concerns (prop-drilled components take props they
-  themselves may not care about)
+  TODO: Separation of concerns (prop-drilled components take
+  props they themselves may not care about)
 </Notes>
 
 ---
@@ -364,10 +364,11 @@ const UserGreeting = () => {
   but it does make this component slightly more complex.
   <hr />
   It's worth pointing out that we probably don't want to connect
-  many simple presentation components to context like this. If we
-  do have a situation where that would be necessary, it might be
-  better to have a parent component that consumes the context and
-  passes the data down to these presentational components.
+  too many simple presentation components to context like this.
+  If we do have a situation where that would be necessary, it
+  might be better to have a single parent component that consumes
+  the context and passes the data down to these presentational
+  components.
 </Notes>
 
 ---
@@ -494,7 +495,7 @@ const RadioButton = ({ value }) => {
   Note that we're excluding the change event handler from the
   code example to keep it short
   <hr />
-  So here's an example of context cleaning up the API of a
+  TODO: So here's an example of context cleaning up the API of a
   compound component while keeping the implementation very simple
   and easy to follow
 </Notes>
@@ -522,8 +523,8 @@ const RadioButton = ({ value }) => {
   work without any API changes
   <hr />
   At Namely, we've taken this idea and run with it a bit. In
-  fact, we took this same pattern and used it to handle form
-  state management for us.
+  fact, we took this same pattern and used it to build an
+  abstraction that handles form state management for us.
 </Notes>
 
 ---
@@ -558,7 +559,7 @@ const RadioButton = ({ value }) => {
 
 <Notes>
   Imagine that we have a Form component that not only renders an
-  HTML form but also does some state management for us
+  HTML form but also does some basic state management for us
   <hr />
   It's children prop is a render prop that passes us the form
   state and a change event handler function
