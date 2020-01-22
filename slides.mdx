@@ -6,8 +6,7 @@ import {
   Pattern,
   Patterns,
   PatternsSummary,
-  FiltersOpen,
-  FiltersClosed
+  FiltersScreenshots
 } from './components';
 
 export const themes = [aspect, prism, custom];
@@ -25,12 +24,12 @@ export const patterns = [
   },
   {
     title: 'Refs with Instance Data',
-    desc: 'Using refs to pass instance methods and properties'
+    desc:
+      'Attaching instance methods and properties to forwarded refs'
   },
   {
     title: 'Dispatch Contexts',
-    desc:
-      'Using context and useReducer for dependency-agnostic flux'
+    desc: 'Using context and useReducer for flux architecture'
   }
 ];
 
@@ -104,7 +103,7 @@ export const patterns = [
   their own shortcomings
   <hr />
   At Namely, we've encountered some of these shortcomings while
-  developings of some of our more complicated design system
+  working on some of our more complicated design system
   components
   <hr />
   So I thought I'd share today some of the issues we've
@@ -116,8 +115,7 @@ export const patterns = [
 # Let's review our options
 
 <Notes>
-  But first, let's quickly review the options React has given us
-  for passing data between components
+  But first, let's review our options
   <hr />
   Just so we're all on the same page
 </Notes>
@@ -166,18 +164,21 @@ export const patterns = [
   Render props are simply function props that return JSX for the
   component to render
   <hr />
-  2 examples here from popular React libraries
+  So we have 2 examples here from popular React libraries of
+  components that use render props
   <hr />
-  React Router uses a render prop in its Route component to
-  determine what to display is a given path is matched
+  The first one, from React Router, uses a prop literally called
+  render
   <hr />
-  React PowerPlug also uses a render prop in its Toggle component
-  but instead of using a prop literally called render, it's using
-  the children prop because of the special syntax children has in
-  React
+  The second one, React PowerPlug, uses the children prop as its
+  render prop because of the shorter syntax in React
   <hr />
-  This is actually probably the most common way render props are
-  used
+  Using children as the render prop is very common for this
+  reason
+  <hr />
+  Notice that it's also passing two properties in the render prop
+  function. This is really where most of the usefulness of this
+  approach comes in.
 </Notes>
 
 ---
@@ -203,11 +204,11 @@ return <Input ref={ref} />;
   <hr />
   Refs can also be used for many other things though
   <hr />
-  In functional components they can be used as essentially
-  instance variables
+  In functional components they can be used as instance variables
+  to store data between renders
   <hr />
   And, as we'll see later, they can also be used to pass data
-  between components which we'll revisit later
+  between components
 </Notes>
 
 ---
@@ -232,15 +233,19 @@ const Button = props => {
   <hr />
   Context works by passing a value to a provider component
   <hr />
-  Any component rendered under this provider in the component
-  tree can then subscribe to this value using the useContext hook
+  Anything rendered under this provider in the component tree can
+  then consume this value using the useContext hook
   <hr />
-  One of the most common use case examples given is for passing
-  theming data to components that then customize their appearance
+  The use case example that always seems to be given for context
+  is theming
   <hr />
-  As we'll see in the next few minutes, context is extremely
-  powerful and can simplify component communication in a lot of
-  scenarios
+  So here we have a theme provider that's passing some theme data
+  to a button component. The button component is then customizing
+  its appearance based on the theme data.
+  <hr />
+  This example gets the point across but, as we'll see in the
+  next few minutes, context can be used for many different
+  scenarios and can often simplify the API of our components.
 </Notes>
 
 ---
@@ -272,13 +277,16 @@ const Button = props => {
 # Useful Patterns
 
 <Patterns active={1} patterns={patterns} />
+<Notes>
+  So we're going to talk about 4 different patterns today
+</Notes>
 
 ---
 
 ### Problem: Prop drilling
 
 ```jsx
-<App userName="Michael Scott" />
+<App userName="Toby Flenderson" />
 // ↓
 <Dashboard userName={userName} />
 // ↓
@@ -303,8 +311,10 @@ const Button = props => {
   <hr />
   API changes are noisy
   <hr />
-  TODO: Separation of concerns (prop-drilled components take
-  props they themselves may not care about)
+  Violates separation of concerns - 3 of these these components
+  aren't actually using this data, they're just passing it along.
+  This makes their API less clear and forces us to write
+  unnecessary tests.
 </Notes>
 
 ---
@@ -325,17 +335,17 @@ const UserContext = React.createContext(null);
 ```
 
 <Notes>
-  One way to solve this is by using context
+  One way to solve this is by using app level context
   <hr />
   If many parts of our application need to access data about the
   user, it might make sense to pass the user data to a context
   provider at the root app level
   <hr />
-  As you can see, we're now only passing the data once to the
-  provider instead of repeating it at every level
+  That allows us to remove all of the redundant props and only
+  pass the user data once
   <hr />
-  And any component that needs access to the user's name can
-  individually choose to consume that information
+  Any component that needs access to this data can individually
+  choose to consume that information
 </Notes>
 
 ---
@@ -427,11 +437,10 @@ Now all common data is passed to `RadioGroup`
   takes name and selectedValue props and passes them down to our
   RadioButton components via context
   <hr />
-  This abstracts the data and logic that the radio buttons had in
-  common in a single place
-  <hr />
-  The group name and the currently selected value are now passed
-  only once to RadioGroup
+  You can see that this cleans up the API really nicely because
+  all of the repeated data is now only passed once to the parent
+  component and the radio buttons are only being passed their own
+  distinct values
 </Notes>
 
 ---
@@ -455,9 +464,7 @@ const RadioGroup = ({ children, name, selectedValue }) => {
 
 <Notes>
   If we take a look at the RadioGroup component, we see that it's
-  not doing much internally
-  <hr />
-  Essentially it's just forwardng the data along in a context
+  really just passing along name and selectedValue to a context
   provider
   <hr />
   Note that we're using useMemo here to avoid creating a new
@@ -488,16 +495,8 @@ const RadioButton = ({ value }) => {
   <hr />
   It's also very simple
   <hr />
-  It's essentially just pulling out the name and selected value
-  from the radio group context and using them to render the radio
-  button
-  <hr />
-  Note that we're excluding the change event handler from the
-  code example to keep it short
-  <hr />
-  TODO: So here's an example of context cleaning up the API of a
-  compound component while keeping the implementation very simple
-  and easy to follow
+  It's essentially just consuming the context from the last slide
+  and passing along the data to the input here
 </Notes>
 
 ---
@@ -519,12 +518,61 @@ const RadioButton = ({ value }) => {
   In this example, we could rename RadioGroup to SelectionGroup
   and allow it to be used with checkboxes as well
   <hr />
-  With a slightly different change event handler, this code could
-  work without any API changes
+  With a slightly different change event handler, we could
+  implement this without any API changes
   <hr />
   At Namely, we've taken this idea and run with it a bit. In
   fact, we took this same pattern and used it to build an
   abstraction that handles form state management for us.
+</Notes>
+
+---
+
+### Instead of this...
+
+```jsx
+<Input name="firstName" value={firstName}
+  onChange={handleFirstNameChange} />
+
+<Input name="lastName" value={lastName}
+  onChange={handleLastNameChange} />
+
+<Input name="email" value={email}
+  onChange={handleEmailChange} />
+
+<Input name="password" value={password}
+  onChange={handlePasswordChange} />
+
+<Button onClick={registerUser}>Register</Button>
+```
+
+<Notes>
+  So instead of writing code that looks like this where we are
+  manually setting the value and change handler for each input
+</Notes>
+
+---
+
+### We can do this
+
+```jsx
+<Form onSubmit={registerUser}>
+  <Input name="firstName" />
+  <Input name="lastName" />
+  <Input name="email" />
+  <Input name="password" />
+  <Button type="submit">Register</Button>
+</Form>
+```
+
+<Notes>
+  We can write code that looks like this
+  <hr />
+  This works because the Form component here is automatically
+  managing the state of these inputs using their names
+  <hr />
+  It automatically listens for change events, internally updates
+  the state, and then sets the current value on each input
 </Notes>
 
 ---
@@ -541,12 +589,12 @@ const RadioButton = ({ value }) => {
 <Form>
   {({ values, handleChange }) => (
     <>
-      <input
+      <Input
         name="name"
         value={values.name}
         onChange={handleChange}
       />
-      <input
+      <Input
         name="email"
         value={values.email}
         onChange={handleChange}
@@ -558,14 +606,17 @@ const RadioButton = ({ value }) => {
 ```
 
 <Notes>
-  Imagine that we have a Form component that not only renders an
-  HTML form but also does some basic state management for us
+  Sticking with the form example, let's imagine that we have a
+  Form component that does some basic state management for us
   <hr />
-  It's children prop is a render prop that passes us the form
-  state and a change event handler function
+  For the sake of the example, let's pretend we don't have that
+  fancy context-connected form component
   <hr />
-  So you can see here we have values which contains our form
-  state and we're using that to set the values of these 2 inputs
+  So this form uses a render prop to pass us the form state and
+  change event handler
+  <hr />
+  So we're taking the values property that's being passed and
+  using it to set the values of these 2 inputs
   <hr />
   There's also this handleChange function that's automatically
   updating our state whenever a change event happens
@@ -580,9 +631,9 @@ const RadioButton = ({ value }) => {
 
 <!-- prettier-ignore -->
 ```jsx
-const AutoSaveForm = ({ save }) => {
+const AutoSaveForm = ({ saveToServer }) => {
   // Oops! We don't have access to `values` from here
-  useTimeInterval(15000, () => save(values));
+  useTimeInterval(15000, () => saveToServer(values));
 
   return (
     <Form>
@@ -593,35 +644,35 @@ const AutoSaveForm = ({ save }) => {
 ```
 
 <Notes>
-  For example, let's imagine we had this AutoSaveForm component
-  that used our Form component internally
+  For example, let's imagine we wanted to use this Form component
+  in an AutoSaveForm component that saves the users input
+  occasionally
   <hr />
-  It needs access to the form state so it can send it to an API
-  every 15 seconds
-  <hr />
-  Unfortunately this wouldn't work because we don't have access
-  to the values variable outside of the render prop function
+  It needs access to the form values in this API call but
+  unfortunately it can't because we don't have access to values
+  outside of the render prop function
 </Notes>
 
 ---
 
 ### Solution: Provide instance methods or properties using a ref
 
+<!-- prettier-ignore -->
 ```jsx
 const Form = forwardRef(({ children }, forwardedRef) => {
   const ref = useRef();
-  const [state, setState] = useState({});
+  const [values, setValues] = useState({});
 
   useImperativeHandle(forwardedRef, () => ({
     element: ref.current,
-    values: state
+    values
   }));
 
-  return children({
-    values: state,
-    handleChange: evt =>
-      setState({ [evt.target.name]: evt.target.value })
-  });
+  return (
+    <form ref={ref}>
+      {children({ values, handleChange })}
+    </form>
+  );
 });
 ```
 
@@ -639,11 +690,11 @@ const Form = forwardRef(({ children }, forwardedRef) => {
   Then we add a values property that contains the form state
   <hr />
   Also note that we're passing an object literal to the children
-  prop here which is something you should never do in real code.
-  This will cause React to always rerender this component because
-  the argument passed to children will never be a reference to
-  the object. We could fix this by wrapping the object in useMemo
-  first. So bonus points to anyone who caught that.
+  prop here which is a bad idea because it will cause React to
+  always rerender this component
+  <hr />
+  We could fix this by wrapping the object in useMemo before
+  passing it along. So bonus points to anyone who caught that.
 </Notes>
 
 ---
@@ -651,10 +702,12 @@ const Form = forwardRef(({ children }, forwardedRef) => {
 ### Solution: Provide instance methods or properties using a ref (cont)
 
 ```jsx
-const AutoSaveForm = ({ save }) => {
+const AutoSaveForm = ({ saveToServer }) => {
   const form = useRef();
 
-  useTimeInterval(15000, () => save(form.current.values));
+  useTimeInterval(15000, () =>
+    saveToServer(form.current.values)
+  );
 
   return (
     <Form ref={form}>
@@ -682,15 +735,22 @@ const AutoSaveForm = ({ save }) => {
 
 ### Problem: Complex compound component with a lot of intercommunication
 
-<FiltersOpen />
-<FiltersClosed />
+<FiltersScreenshots />
 <Notes>
   At Namely one of the design system components we worked on
   recently was a Filters dropdown. The dropdown contains a
   dynamic number of filter fields, a reset button, and an apply
-  button (so it's basically a mini form in a dropdown). Hitting
-  Apply not only filters the content but also causes these little
-  filter chips to be rendered.
+  button (so it's basically a mini form in a dropdown).
+  <hr />
+  When the user hits apply, a number of things need to happen:
+  <hr />
+  The data in the form needs to get committed
+  <hr />
+  The dropdown needs to close
+  <hr />
+  These little filter status chips need to get rendered
+  <hr />
+  And of course the content needs to be filtered
   <hr />
   So there's a lot of intercommunication going on in this
   component. Data is being shared between a lot of different
@@ -707,8 +767,6 @@ const AutoSaveForm = ({ save }) => {
 ### Solution: Use context to pass a dispatch function
 
 ```jsx
-const FiltersContext = React.createContext();
-
 const Filters = () => {
   const [state, dispatch] = useReducer(filtersReducer);
 
@@ -723,6 +781,9 @@ const Filters = () => {
 <Notes>
   First we use React's useReducer hook and pass the dispatch
   function to a context provider in the top-level component.
+  <hr />
+  This will allow any consumer to dispatch actions from anywhere
+  within the compound component
 </Notes>
 
 ---
@@ -732,27 +793,32 @@ const Filters = () => {
 ```jsx
 const FiltersToggle = () => {
   const dispatch = useContext(FiltersContext);
+
   const handleClick = useCallback(
     () => dispatch({ type: 'TOGGLE_DROPDOWN' }),
     [dispatch]
   );
 
-  return <button onClick={handleClick}>Filters</button>;
+  return <Button onClick={handleClick}>Filters</Button>;
 };
 ```
 
 <Notes>
-  Then, in any subcomponent that needs to dispatch an action, we
-  consume the FiltersContext to get access to the dispatch
-  function, and call it from any event handlers we need to.
+  Next we update one of the subcomponents to use the dispatch
+  function.
   <hr />
-  In this example we're dispatching a TOGGLE_DROPDOWN action from
-  the main dropdown menu button component to open or close the
-  dropdown.
+  For example, here we have the main toggle button that opens and
+  closes the dropdown.
   <hr />
-  By sharing this dispatch function via context, we're able to
-  utilize the flux pattern which is great at grouping state
-  change logic in a single place
+  All we need to do to dispatch an action is to get the dispatch
+  function from context and then call it in an event handler.
+  <hr />
+  We could repeat this simple setup in as many components as
+  needed without increasing complexity further
+  <hr />
+  By sharing this dispatch function like this, we're able to
+  utilize the flux pattern which we know, thanks to Redux, is
+  great at grouping state changes in a single place
 </Notes>
 
 ---
@@ -761,11 +827,12 @@ const FiltersToggle = () => {
 
 <PatternsSummary patterns={patterns} />
 <Notes>
-  So we've gone over 4 different patterns we've started using in
-  our more complicated components at Namely. Hopefully something
-  I talked about today can help clean up the APIs of some of your
-  components or just give you another option for communicating
-  between your components.
+  So we've gone over 4 different patterns that have helped us at
+  Namely as we start to build more and more complicated
+  components in our design system. Hopefully something I talked
+  about today can help clean up some of your component APIs or
+  just give you another option for passing around data in your
+  applications.
 </Notes>
 
 ---
