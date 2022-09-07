@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cross Component Communication</title>
+
+    <style>
+      html {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        font-size: 20px;
+        color: #444;
+        line-height: 1.6;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+
+      main {
+        max-width: 55ch;
+        margin: 0 auto;
+        text-align: center;
+      }
+
+      blockquote {
+        text-align: left;
+        border-left: 4px solid #ccc;
+        margin: 2rem;
+        padding: 0 1em;
+        font-style: italic;
+      }
+
+      p {
+        margin: 1em 0;
+      }
+
+      .wave {
+        font-size: 4rem;
+        margin: 1rem 0;
+      }
+
+      .cta {
+        display: inline-flex;
+        background-color: #006dd4;
+        border: 0;
+        border-radius: 3px;
+        color: white;
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        outline-offset: 2px;
+      }
+
+      .cta:hover {
+        background-color: #165ada;
+      }
+
+      .tip {
+        color: #666;
+        font-size: 0.75em;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="wave">👋</p>
+
+      <p>
+        Hello! This is the slide deck for my talk on
+        <strong>Cross Component Communication</strong> at React NYC in January
+        2020. Here's the original intro:
+      </p>
+
+      <blockquote>
+        In this talk, I’ll go over the various options we have for communicating
+        between React components and outline their pros and cons. Then we’ll
+        dive into how to avoid some of the pitfalls by leveraging patterns we’ve
+        found useful in some of our most complicated components here at Namely.
+      </blockquote>
+
+      <div>
+        <p><a class="cta" href="/0">View Slides →</a></p>
+        <p class="tip">Tip: use arrow keys to navigate between slides.</p>
+      </div>
+    </main>
+  </body>
+</html>

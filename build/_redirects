@@ -1,0 +1,5 @@
+# Redirect default Netlify subdomain to primary domain
+https://cross-component-communication.netlify.com/* https://cross-component-communication.mturco.com/:splat 301!
+
+/     /index.html  200
+/*    /deck.html   200
